@@ -88,6 +88,7 @@ namespace FordsAlgorithm
                 return МассивГрафовList.SingleOrDefault(f => f.UIDГрафа.Equals(UIDТекущегоГрафа));
             }
         }
+
         public UserControlНовыйГраф()
         {
             InitializeComponent();
@@ -99,8 +100,7 @@ namespace FordsAlgorithm
         public event EventHandler МассивГрафовSelectionChanged;
         public event EventHandler МассивГрафовДобавление;
         public event EventHandler МассивГрафовУдаление;
-
-
+        
         private void buttonНовыйГраф_Click(object sender, EventArgs e)
         {
             textBoxИмяГрафа.Enabled = true;
@@ -111,38 +111,6 @@ namespace FordsAlgorithm
             textBoxИмяГрафа.Text = $"Новый граф # {МассивГрафовList.Count + 1}";
             textBoxИмяГрафа.Focus();
             textBoxИмяГрафа.SelectAll();
-        }
-
-        private void buttonДобавитьРебро_Click(object sender, EventArgs e)
-        {
-            var curCell = gridViewМатрицаСмежности.CurrentCell;
-            if (curCell == null) { return; }
-
-            МассивГрафовList.Single(f => f.UIDГрафа.Equals(UIDТекущегоГрафа))?.ДобавитьРебро
-                (
-                    new Ребро
-                    (
-                        (int)numericВесРебра.Value,
-                        ТекущийГраф.ВершинаПоНомеру(curCell.RowIndex + 1),
-                        ТекущийГраф.ВершинаПоНомеру(curCell.ColumnIndex)
-                    )
-                );
-
-            МассивГрафовDT.ОбновитьСтроку(ТекущийГраф.UIDГрафа.Value, ТекущийГраф.ИмяГрафа, ТекущийГраф.КоличествоВершин, ТекущийГраф.КоличествоРебер);
-            gridViewМатрицаСмежности.DataSource = ТекущийГраф.ПостороитьМатрицуСмежности();
-            gridViewМатрицаСмежности[МатрицаТекущийСтолбец, МатрицаТекущаяСтрока].Selected = true;
-
-            КоличествоРеберChanged?.Invoke(this, new EventArgs());
-        }
-
-        private void gridViewМассивГрафов_SelectionChanged(object sender, EventArgs e)
-        {
-            var focusDR = gridViewМассивГрафов.SelectedRows.Cast<DataGridViewRow>().SingleOrDefault();
-            if(focusDR != null)
-            {
-                gridViewМатрицаСмежности.DataSource = ТекущийГраф.ПостороитьМатрицуСмежности();
-            }
-            МассивГрафовSelectionChanged?.Invoke(this, new EventArgs());
         }
 
         private void buttonСоздатьГраф_Click(object sender, EventArgs e)
@@ -169,13 +137,26 @@ namespace FordsAlgorithm
             МассивГрафовУдаление?.Invoke(this, new EventArgs());
         }
 
-        private void gridViewМатрицаСмежности_ColumnAdded(object sender, DataGridViewColumnEventArgs e)
+        private void buttonДобавитьРебро_Click(object sender, EventArgs e)
         {
-            e.Column.SortMode = DataGridViewColumnSortMode.NotSortable;
-            if (e.Column.Name.Equals("#"))
-            {
-                e.Column.ReadOnly = true;
-            }
+            var curCell = gridViewМатрицаСмежности.CurrentCell;
+            if (curCell == null) { return; }
+
+            МассивГрафовList.Single(f => f.UIDГрафа.Equals(UIDТекущегоГрафа))?.ДобавитьРебро
+                (
+                    new Ребро
+                    (
+                        (int)numericВесРебра.Value,
+                        ТекущийГраф.ВершинаПоНомеру(curCell.RowIndex + 1),
+                        ТекущийГраф.ВершинаПоНомеру(curCell.ColumnIndex)
+                    )
+                );
+
+            МассивГрафовDT.ОбновитьСтроку(ТекущийГраф.UIDГрафа.Value, ТекущийГраф.ИмяГрафа, ТекущийГраф.КоличествоВершин, ТекущийГраф.КоличествоРебер);
+            gridViewМатрицаСмежности.DataSource = ТекущийГраф.ПостороитьМатрицуСмежности();
+            gridViewМатрицаСмежности[МатрицаТекущийСтолбец, МатрицаТекущаяСтрока].Selected = true;
+
+            КоличествоРеберChanged?.Invoke(this, new EventArgs());
         }
 
         private void buttonУдалитьРебро_Click(object sender, EventArgs e)
@@ -192,37 +173,6 @@ namespace FordsAlgorithm
             МассивГрафовDT.ОбновитьСтроку(ТекущийГраф.UIDГрафа.Value, ТекущийГраф.ИмяГрафа, ТекущийГраф.КоличествоВершин, ТекущийГраф.КоличествоРебер);
             gridViewМатрицаСмежности.DataSource = ТекущийГраф.ПостороитьМатрицуСмежности();
             gridViewМатрицаСмежности[МатрицаТекущийСтолбец, МатрицаТекущаяСтрока].Selected = true;
-        }
-
-        private void gridViewМатрицаСмежности_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if ((e.ColumnIndex == 0) || ((e.RowIndex + 1) == (e.ColumnIndex)))
-            {
-                panel2.Enabled = false;
-                buttonДобавитьРебро.Text = $"Добавить ребро";
-            }
-            else
-            {
-                panel2.Enabled = true;
-                buttonДобавитьРебро.Text = $"Добавить ребро <{e.RowIndex + 1} → {e.ColumnIndex}>";
-            }
-
-            МатрицаТекущаяСтрока = e.RowIndex;
-            МатрицаТекущийСтолбец = e.ColumnIndex;
-        }
-
-        private void gridViewМатрицаСмежности_DataSourceChanged(object sender, EventArgs e)
-        {
-            foreach(DataGridViewColumn col in gridViewМатрицаСмежности.Columns)
-            {
-                foreach(DataGridViewRow row in gridViewМатрицаСмежности.Rows)
-                {
-                    if ((row.Index + 1) == (col.Index))
-                    {
-                        gridViewМатрицаСмежности[col.Index, row.Index].Style.BackColor = System.Drawing.Color.Black;
-                    }
-                }
-            } 
         }
 
         private void buttonСохранитьКак_Click(object sender, EventArgs e)
@@ -274,6 +224,57 @@ namespace FordsAlgorithm
 
             gridViewМассивГрафов.Rows[МассивГрафовDT.ИндексСтрокиПоUIDграфа(openГраф.UIDГрафа.Value)].Selected = true;
         }
+
+        private void gridViewМассивГрафов_SelectionChanged(object sender, EventArgs e)
+        {
+            var focusDR = gridViewМассивГрафов.SelectedRows.Cast<DataGridViewRow>().SingleOrDefault();
+            if(focusDR != null)
+            {
+                gridViewМатрицаСмежности.DataSource = ТекущийГраф.ПостороитьМатрицуСмежности();
+            }
+            МассивГрафовSelectionChanged?.Invoke(this, new EventArgs());
+        }
+
+        private void gridViewМатрицаСмежности_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if ((e.ColumnIndex == 0) || ((e.RowIndex + 1) == (e.ColumnIndex)))
+            {
+                panel2.Enabled = false;
+                buttonДобавитьРебро.Text = $"Добавить ребро";
+            }
+            else
+            {
+                panel2.Enabled = true;
+                buttonДобавитьРебро.Text = $"Добавить ребро <{e.RowIndex + 1} → {e.ColumnIndex}>";
+            }
+
+            МатрицаТекущаяСтрока = e.RowIndex;
+            МатрицаТекущийСтолбец = e.ColumnIndex;
+        }
+
+        private void gridViewМатрицаСмежности_ColumnAdded(object sender, DataGridViewColumnEventArgs e)
+        {
+            e.Column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            if (e.Column.Name.Equals("#"))
+            {
+                e.Column.ReadOnly = true;
+            }
+        }
+
+        private void gridViewМатрицаСмежности_DataSourceChanged(object sender, EventArgs e)
+        {
+            foreach(DataGridViewColumn col in gridViewМатрицаСмежности.Columns)
+            {
+                foreach(DataGridViewRow row in gridViewМатрицаСмежности.Rows)
+                {
+                    if ((row.Index + 1) == (col.Index))
+                    {
+                        gridViewМатрицаСмежности[col.Index, row.Index].Style.BackColor = System.Drawing.Color.Black;
+                    }
+                }
+            } 
+        }
+
     }
 }
     

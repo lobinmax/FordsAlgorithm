@@ -106,22 +106,6 @@ namespace FordsAlgorithm
             Ребра.Clear();
         }
 
-        private int? ОпределитьБесконечность()
-        {
-            if (!Вершины.Any())
-            {
-                MessageBox.Show("Граф не содержит вершин", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-            if (!Ребра.Any())
-            {
-                MessageBox.Show("Граф не содержит ребер", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-
-            return Ребра.Sum(f => f.Вес) + 1;
-        }
-
         public string ОпределитьКороткийПуть(int ПутьСтарт, int ПутьФиниш)
         {
             if (Вершины.SingleOrDefault(f => f.НомерВершины == ПутьСтарт) == null)
@@ -172,7 +156,36 @@ namespace FordsAlgorithm
             }
 
             return $"Кратчайший путь из вершины <{ПутьСтарт}> в вершину <{ПутьФиниш}> :{String.Join(" | ", КратчайшийПутьlist)}. Расстояние - {ВершинаПоНомеру(ПутьФиниш).Потенциал} единиц.";
+        }
 
+        public DataTable ПостороитьМатрицуСмежности()
+        {
+            var Матрица = new DataTable();
+
+            Матрица.Columns.Add(new DataColumn() { ColumnName = "#" });
+            for (var i = 0; i<Вершины.Count; i++ )
+            {
+                Матрица.Columns.Add(new DataColumn() { ColumnName = $"Вершина {i + 1}", DataType = typeof(string) });
+            }
+            for (var i = 0; i < Вершины.Count; i++)
+            {
+                Матрица.Rows.Add(Матрица.NewRow());
+            }
+
+            for(var row = 1; row <= Матрица.Rows.Count; row++)
+            {
+                Матрица.Rows[row - 1][0] = row;
+                for (var col = 1; col <= Матрица.Rows.Count; col++)
+                {
+                    var ребро = Ребра.Where(f => f.ВекторНачало.НомерВершины == row && f.ВекторКонец.НомерВершины == col).SingleOrDefault();
+                    if (ребро != null)
+                    {
+                        Матрица.Rows[row - 1][col] = $"√ Вес = {ребро.Вес}";
+                    }
+                }
+            }
+
+            return Матрица;
         }
 
         private List<Вершина> РасчетПотенциалаВершин(Вершина вершина, ref int УровеньДостижимости)
@@ -210,34 +223,20 @@ namespace FordsAlgorithm
             }
         }
 
-        public DataTable ПостороитьМатрицуСмежности()
+        private int? ОпределитьБесконечность()
         {
-            var Матрица = new DataTable();
-
-            Матрица.Columns.Add(new DataColumn() { ColumnName = "#" });
-            for (var i = 0; i<Вершины.Count; i++ )
+            if (!Вершины.Any())
             {
-                Матрица.Columns.Add(new DataColumn() { ColumnName = $"Вершина {i + 1}", DataType = typeof(string) });
+                MessageBox.Show("Граф не содержит вершин", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
             }
-            for (var i = 0; i < Вершины.Count; i++)
+            if (!Ребра.Any())
             {
-                Матрица.Rows.Add(Матрица.NewRow());
-            }
-
-            for(var row = 1; row <= Матрица.Rows.Count; row++)
-            {
-                Матрица.Rows[row - 1][0] = row;
-                for (var col = 1; col <= Матрица.Rows.Count; col++)
-                {
-                    var ребро = Ребра.Where(f => f.ВекторНачало.НомерВершины == row && f.ВекторКонец.НомерВершины == col).SingleOrDefault();
-                    if (ребро != null)
-                    {
-                        Матрица.Rows[row - 1][col] = $"√ Вес = {ребро.Вес}";
-                    }
-                }
+                MessageBox.Show("Граф не содержит ребер", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
             }
 
-            return Матрица;
+            return Ребра.Sum(f => f.Вес) + 1;
         }
 
     }

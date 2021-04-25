@@ -62,7 +62,7 @@
             // buttonНайтиПуть
             // 
             this.buttonНайтиПуть.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.buttonНайтиПуть.Location = new System.Drawing.Point(792, 527);
+            this.buttonНайтиПуть.Location = new System.Drawing.Point(868, 527);
             this.buttonНайтиПуть.Name = "buttonНайтиПуть";
             this.buttonНайтиПуть.Size = new System.Drawing.Size(205, 27);
             this.buttonНайтиПуть.TabIndex = 12;
